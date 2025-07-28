@@ -41,12 +41,17 @@ def get_db_connection():
             "UID=db_abbcbc_gcoffee_admin;"
             "PWD=Thanh123@"
         )
+        print(f"[DEBUG] Đang thử kết nối CSDL với chuỗi: {conn_str}", file=sys.stderr)
         conn = pyodbc.connect(conn_str)
+        print("[DEBUG] Kết nối CSDL thành công", file=sys.stderr)
         return conn
     except pyodbc.Error as ex:
-        sqlstate = ex.args[0]
-        print(f"Lỗi kết nối CSDL SQL Server: {sqlstate}", file=sys.stderr)
-        print(ex, file=sys.stderr)
+        sqlstate = ex.args[0] if ex.args else "Unknown"
+        print(f"[ERROR] Lỗi kết nối CSDL SQL Server: {sqlstate}", file=sys.stderr)
+        print(f"[ERROR] Chi tiết lỗi: {ex}", file=sys.stderr)
+        return None
+    except Exception as e:
+        print(f"[ERROR] Lỗi không xác định khi kết nối CSDL: {e}", file=sys.stderr)
         return None
 
 # Hàm lấy dữ liệu bán hàng cho AI (Logic không thay đổi)
