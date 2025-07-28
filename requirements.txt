@@ -1,0 +1,6 @@
+flask
+flask-restx
+pyodbc
+pandas
+google-generativeai
+requests
