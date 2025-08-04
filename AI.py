@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[ ]:
-
-
 # AI.py
 from flask import Flask, jsonify, render_template_string, request
 from flask_restx import Api, Resource, fields # Đã import Flask-RESTx
@@ -30,28 +24,26 @@ ai_model_text = genai.GenerativeModel('gemini-2.0-flash')
 # Hàm kết nối CSDL
 def get_db_connection():
     """
-    Thiết lập và trả về đối tượng kết nối đến SQL Server.
+    Kết nối đến CSDL SQL Server online (ví dụ: site4now.net).
     """
-    conn = None
+    server = 'SQL1004.site4now.net'
+    database = 'db_abbcbc_gcoffee'
+    username = 'db_abbcbc_gcoffee_admin'
+    password = 'Thanh123@'
+    driver = '{ODBC Driver 17 for SQL Server}'  # Đảm bảo đã cài driver này
+
     try:
         conn_str = (
-            "DRIVER={SQL Server};"
-            "SERVER=SQL1004.site4now.net;"
-            "DATABASE=db_abbcbc_gcoffee;"
-            "UID=db_abbcbc_gcoffee_admin;"
-            "PWD=Thanh123@"
+            f'DRIVER={driver};'
+            f'SERVER={server};'
+            f'DATABASE={database};'
+            f'UID={username};'
+            f'PWD={password};'
         )
-        print(f"[DEBUG] Đang thử kết nối CSDL với chuỗi: {conn_str}", file=sys.stderr)
         conn = pyodbc.connect(conn_str)
-        print("[DEBUG] Kết nối CSDL thành công", file=sys.stderr)
         return conn
     except pyodbc.Error as ex:
-        sqlstate = ex.args[0] if ex.args else "Unknown"
-        print(f"[ERROR] Lỗi kết nối CSDL SQL Server: {sqlstate}", file=sys.stderr)
-        print(f"[ERROR] Chi tiết lỗi: {ex}", file=sys.stderr)
-        return None
-    except Exception as e:
-        print(f"[ERROR] Lỗi không xác định khi kết nối CSDL: {e}", file=sys.stderr)
+        print(f"Lỗi kết nối CSDL: {ex}", file=sys.stderr)
         return None
 
 # Hàm lấy dữ liệu bán hàng cho AI (Logic không thay đổi)
@@ -383,13 +375,13 @@ class Recommendations(Resource):
             try:
                 sales_data_df = get_sales_data_for_ai(conn)
                 inventory_df = get_current_inventory(conn)
-
+                
                 recommendations_data = recommend_products(sales_data_df, inventory_df, 
                                                        top_n_hot=3, top_n_cold=2,
                                                        target_stock_duration_weeks=2,
                                                        hot_threshold_weekly=20,
                                                        cold_threshold_weekly=3)
-
+                
                 return recommendations_data, 200 # Trả về dữ liệu và status code 200
             except Exception as e:
                 print(f"Lỗi khi xử lý đề xuất: {e}", file=sys.stderr)
@@ -764,11 +756,11 @@ def index_html():
                 async function getRecommendations() {
                     const recommendationsDiv = document.getElementById('recommendations');
                     recommendationsDiv.innerHTML = '<div class="loading-message">Đang lấy dữ liệu và phân tích... Vui lòng chờ vài giây.</div>';
-
+                    
                     try {
                         const response = await fetch('/recommendations/'); 
                         const data = await response.json();
-
+                        
                         if (response.status !== 200) { 
                             recommendationsDiv.innerHTML = `<p style="color: red; text-align: center;">Lỗi từ server (${response.status}): ${data.message || 'Không rõ lỗi'}</p>`;
                             console.error("Server error:", data);
@@ -808,14 +800,14 @@ def index_html():
                 async function askAI() {
                     const userQuery = document.getElementById('userQuery').value;
                     const aiResponseDiv = document.getElementById('aiResponse');
-
+                    
                     if (!userQuery.trim()) {
                         aiResponseDiv.innerText = "Vui lòng nhập câu hỏi của bạn.";
                         return;
                     }
 
                     aiResponseDiv.innerText = "AI đang suy nghĩ... Vui lòng chờ.";
-
+                    
                     try {
                         const response = await fetch('/ai/chat', { 
                             method: 'POST',
@@ -846,4 +838,3 @@ def index_html():
 # Chạy ứng dụng Flask
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=os.environ.get('PORT', 5000))
-
