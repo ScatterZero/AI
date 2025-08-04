@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+*.log
+
+# Virtual env
+.venv/
+env/
+venv/
+
+# AI model files
+*.pt
+*.bin
+*.h5
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Vercel
+.vercel/output/
