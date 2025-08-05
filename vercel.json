@@ -3,10 +3,7 @@
   "builds": [
     {
       "src": "AI.py",
-      "use": "@vercel/python",
-      "config": {
-        "maxLambdaSize": "50mb"
-      }
+      "use": "@vercel/python"
     }
   ],
   "routes": [
@@ -14,10 +11,5 @@
       "src": "/(.*)",
       "dest": "AI.py"
     }
-  ],
-  "env": {
-    "GOOGLE_API_KEY": "@google_api_key"
-  }
-
-  
+  ]
 }
