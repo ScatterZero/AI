@@ -17,10 +17,29 @@ else:
 ai_model_text = genai.GenerativeModel('gemini-2.0-flash')
 
 # Hàm kết nối CSDL
+# import pyodbc
+# def get_db_connection():
+#     try:
+#         # conn_str = os.getenv("DATABASE_URL")
+        
+#         conn = pyodbc.connect(conn_str)
+#         return conn
+#     except Exception as ex:
+#         print(f"Lỗi kết nối CSDL: {ex}", file=sys.stderr)
+#         return None
 import pyodbc
+import sys
+
 def get_db_connection():
     try:
-        conn_str = os.getenv("DATABASE_URL")
+        conn_str = (
+            "DRIVER={ODBC Driver 17 for SQL Server};"
+            "Server=SQL1004.site4now.net;"
+            "Database=db_abbcbc_gcoffee;"
+            "UID=db_abbcbc_gcoffee_admin;"
+            "PWD=Thanh123@;"
+            "PORT=1433"
+        )
         conn = pyodbc.connect(conn_str)
         return conn
     except Exception as ex:
