@@ -1,8 +1,0 @@
-__pycache__/
-.venv/
-*.pt
-*.bin
-*.h5
-tests/
-docs/
-models/
