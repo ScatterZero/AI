@@ -17,14 +17,11 @@ else:
 ai_model_text = genai.GenerativeModel('gemini-2.0-flash')
 
 # Hàm kết nối CSDL
+import pyodbc
 def get_db_connection():
-    server = 'SQL1004.site4now.net'
-    database = 'db_abbcbc_gcoffee'
-    username = 'db_abbcbc_gcoffee_admin'
-    password = 'Thanh123@'
     try:
-        import pymssql
-        conn = pymssql.connect(server=server, database=database, user=username, password=password)
+        conn_str = os.getenv("DATABASE_URL")
+        conn = pyodbc.connect(conn_str)
         return conn
     except Exception as ex:
         print(f"Lỗi kết nối CSDL: {ex}", file=sys.stderr)
