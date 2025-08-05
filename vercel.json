@@ -17,10 +17,7 @@
   ],
   "env": {
     "GOOGLE_API_KEY": "@google_api_key"
-  },
-  "functions": {
-    "AI.py": {
-      "maxDuration": 30
-    }
   }
+
+  
 }
