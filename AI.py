@@ -1,6 +1,5 @@
 from flask import Flask, jsonify, render_template_string, request
 from flask_restx import Api, Resource, fields
-import pyodbc
 import pandas as pd
 from datetime import datetime, timedelta
 import google.generativeai as genai
@@ -736,7 +735,51 @@ class AIChat(Resource):
             if conn:
                 conn.close()
         return {'ai_response': ai_response_text}, 200
+# Thêm vào cuối file AI.py, trước dòng if __name__ == '__main__':
 
+# Global error handlers
+@app.errorhandler(500)
+def internal_error(error):
+    return jsonify({
+        'error': 'Internal server error',
+        'message': 'Đã xảy ra lỗi hệ thống. Vui lòng thử lại sau.'
+    }), 500
+
+@app.errorhandler(404)
+def not_found(error):
+    return jsonify({
+        'error': 'Not found',
+        'message': 'Endpoint không tồn tại'
+    }), 404
+
+# Health check endpoint
+@app.route('/health')
+def health_check():
+    db_status = "ERROR"
+    db_message = "Không thể kết nối"
+    
+    try:
+        conn = get_db_connection()
+        if conn:
+            db_status = "OK"
+            db_message = "Kết nối thành công"
+            conn.close()
+    except Exception as e:
+        db_message = f"Lỗi: {str(e)}"
+    
+    return jsonify({
+        'status': 'OK',
+        'database': {
+            'status': db_status,
+            'message': db_message,
+            'available': DB_AVAILABLE
+        },
+        'timestamp': datetime.now().isoformat()
+    })
+
+# Cập nhật app configuration
+app.config['JSON_AS_ASCII'] = False  # Hỗ trợ tiếng Việt
+app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
 # Chạy ứng dụng
 # if __name__ == '__main__':
 #     app.run(debug=True, host='0.0.0.0', port=os.environ.get('PORT', 5000))
