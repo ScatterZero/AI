@@ -23,18 +23,11 @@ def get_db_connection():
     database = 'db_abbcbc_gcoffee'
     username = 'db_abbcbc_gcoffee_admin'
     password = 'Thanh123@'
-    driver = '{ODBC Driver 17 for SQL Server}'
     try:
-        conn_str = (
-            f'DRIVER={driver};'
-            f'SERVER={server};'
-            f'DATABASE={database};'
-            f'UID={username};'
-            f'PWD={password};'
-        )
-        conn = pyodbc.connect(conn_str)
+        import pymssql
+        conn = pymssql.connect(server=server, database=database, user=username, password=password)
         return conn
-    except pyodbc.Error as ex:
+    except Exception as ex:
         print(f"Lỗi kết nối CSDL: {ex}", file=sys.stderr)
         return None
 
