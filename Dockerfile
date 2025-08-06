@@ -41,9 +41,9 @@ RUN useradd --create-home --shell /bin/bash app \
     && chown -R app:app /app
 USER app
 
-# Expose port (mặc định 5000, Render sẽ ghi đè bằng $PORT)
-ENV PORT=5000
+# Expose port
+ENV PORT=10000 
 EXPOSE $PORT
 
-# Run the application
-CMD gunicorn --bind 0.0.0.0:$PORT --workers 4 --timeout 120 AI:app
+# Run the application with increased timeout
+CMD gunicorn --bind 0.0.0.0:$PORT --workers 4 --timeout 180 AI:app
