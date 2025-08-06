@@ -27,19 +27,18 @@ ai_model_text = genai.GenerativeModel('gemini-2.0-flash')
 #     except Exception as ex:
 #         print(f"Lỗi kết nối CSDL: {ex}", file=sys.stderr)
 #         return None
+import os
 import pyodbc
-import sys
 
 def get_db_connection():
     try:
-        conn_str = (
-            "DRIVER={ODBC Driver 17 for SQL Server};"
-            "Server=SQL1004.site4now.net;"
-            "Database=db_abbcbc_gcoffee;"
-            "UID=db_abbcbc_gcoffee_admin;"
-            "PWD=Thanh123@;"
-            "PORT=1433"
-        )
+        server = os.getenv('DB_SERVER')
+        database = os.getenv('DB_NAME')
+        username = os.getenv('DB_USER')
+        password = os.getenv('DB_PASSWORD')
+        port = os.getenv('DB_PORT', '1433')
+        driver = 'ODBC Driver 17 for SQL Server'  # Bỏ dấu {}
+        conn_str = f"DRIVER={driver};SERVER={server};PORT={port};DATABASE={database};UID={username};PWD={password}"
         conn = pyodbc.connect(conn_str)
         return conn
     except Exception as ex:
@@ -797,5 +796,5 @@ def health_check():
 app.config['JSON_AS_ASCII'] = False  # Hỗ trợ tiếng Việt
 app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
 # Chạy ứng dụng
-# if __name__ == '__main__':
-#     app.run(debug=True, host='0.0.0.0', port=os.environ.get('PORT', 5000))
+if __name__ == '__main__':
+    app.run(debug=True, host='0.0.0.0', port=os.environ.get('PORT', 5000))
