@@ -751,7 +751,7 @@ class AIChat(Resource):
                 conn.close()
         return {'ai_response': ai_response_text}, 200
 # Thêm vào cuối file AI.py, trước dòng if __name__ == '__main__':
-
+    
 # Global error handlers
 @app.errorhandler(500)
 def internal_error(error):
@@ -768,39 +768,26 @@ def not_found(error):
     }), 404
 
 # Health check endpoint
-# Health check endpoint
+
 @app.route('/health')
 def health_check():
-    db_status = "ERROR"
-    db_message = "Không thể kết nối"
-    DB_AVAILABLE = False  # Định nghĩa biến và gán giá trị mặc định
+    return jsonify({
+        'status': 'OK',
+        'timestamp': datetime.now().isoformat()
+    }), 200
 
-    try:
-        conn = get_db_connection()
-        if conn:
-            db_status = "OK"
-            db_message = "Kết nối thành công"
-            DB_AVAILABLE = True  # Cập nhật giá trị nếu kết nối thành công
-            conn.close()
-        else:
-            # Nếu get_db_connection() trả về None, kết nối đã thất bại
-            db_status = "ERROR"
-            db_message = "Kết nối thất bại (get_db_connection() trả về None)"
-            DB_AVAILABLE = False
-            
-    except Exception as e:
-        db_message = f"Lỗi: {str(e)}"
-        DB_AVAILABLE = False
-    
+@app.route('/health/detailed')
+def detailed_health_check():
+    db_available, db_message = check_db_connection()
     return jsonify({
         'status': 'OK',
         'database': {
-            'status': db_status,
+            'status': 'OK' if db_available else 'ERROR',
             'message': db_message,
-            'available': DB_AVAILABLE # Biến DB_AVAILABLE giờ đã được định nghĩa
+            'available': db_available
         },
         'timestamp': datetime.now().isoformat()
-    })
+    }), 200
 
 # Cập nhật app configuration
 app.config['JSON_AS_ASCII'] = False  # Hỗ trợ tiếng Việt
