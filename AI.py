@@ -768,26 +768,36 @@ def not_found(error):
     }), 404
 
 # Health check endpoint
+# Health check endpoint
 @app.route('/health')
 def health_check():
     db_status = "ERROR"
     db_message = "Không thể kết nối"
-    
+    DB_AVAILABLE = False  # Định nghĩa biến và gán giá trị mặc định
+
     try:
         conn = get_db_connection()
         if conn:
             db_status = "OK"
             db_message = "Kết nối thành công"
+            DB_AVAILABLE = True  # Cập nhật giá trị nếu kết nối thành công
             conn.close()
+        else:
+            # Nếu get_db_connection() trả về None, kết nối đã thất bại
+            db_status = "ERROR"
+            db_message = "Kết nối thất bại (get_db_connection() trả về None)"
+            DB_AVAILABLE = False
+            
     except Exception as e:
         db_message = f"Lỗi: {str(e)}"
+        DB_AVAILABLE = False
     
     return jsonify({
         'status': 'OK',
         'database': {
             'status': db_status,
             'message': db_message,
-            'available': DB_AVAILABLE
+            'available': DB_AVAILABLE # Biến DB_AVAILABLE giờ đã được định nghĩa
         },
         'timestamp': datetime.now().isoformat()
     })
