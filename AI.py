@@ -17,16 +17,6 @@ else:
 ai_model_text = genai.GenerativeModel('gemini-2.0-flash')
 
 # Hàm kết nối CSDL
-# import pyodbc
-# def get_db_connection():
-#     try:
-#         # conn_str = os.getenv("DATABASE_URL")
-        
-#         conn = pyodbc.connect(conn_str)
-#         return conn
-#     except Exception as ex:
-#         print(f"Lỗi kết nối CSDL: {ex}", file=sys.stderr)
-#         return None
 import os
 import pyodbc
 
@@ -37,8 +27,10 @@ def get_db_connection():
         username = os.getenv('DB_USER')
         password = os.getenv('DB_PASSWORD')
         port = os.getenv('DB_PORT', '1433')
-        driver = 'ODBC Driver 17 for SQL Server'  # Bỏ dấu {}
-        conn_str = f"DRIVER={driver};SERVER={server};PORT={port};DATABASE={database};UID={username};PWD={password}"
+        driver = 'ODBC Driver 17 for SQL Server'
+        # Log để kiểm tra biến môi trường
+        print(f"DB Config: SERVER={server}, DATABASE={database}, USER={username}, PORT={port}", file=sys.stdout)
+        conn_str = f"DRIVER={driver};SERVER={server};PORT={port};DATABASE={database};UID={username};PWD={password};ConnectTimeout=10"
         conn = pyodbc.connect(conn_str)
         return conn
     except Exception as ex:
@@ -657,7 +649,7 @@ class AIChat(Resource):
                     }
                 }
                 apiUrl = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={GOOGLE_API_KEY}"
-                response_gemini = requests.post(apiUrl, json=payload)
+                response_gemini = requests.post(apiUrl, json=payload, timeout=10)
                 response_gemini.raise_for_status()
                 content_type = response_gemini.headers.get('Content-Type', '')
                 if 'application/json' not in content_type:
@@ -708,7 +700,7 @@ class AIChat(Resource):
                             chat_history = [{"role": "user", "parts": [{"text": prompt_response_generation}]}]
                             payload = {"contents": chat_history}
                             apiUrl = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={GOOGLE_API_KEY}"
-                            response_gen = requests.post(apiUrl, json=payload)
+                            response_gen = requests.post(apiUrl, json=payload, timeout=10)
                             response_gen.raise_for_status()
                             content_type = response_gen.headers.get('Content-Type', '')
                             if 'application/json' not in content_type:
@@ -750,8 +742,7 @@ class AIChat(Resource):
             if conn:
                 conn.close()
         return {'ai_response': ai_response_text}, 200
-# Thêm vào cuối file AI.py, trước dòng if __name__ == '__main__':
-    
+
 # Global error handlers
 @app.errorhandler(500)
 def internal_error(error):
@@ -768,30 +759,10 @@ def not_found(error):
     }), 404
 
 # Health check endpoint
-
 @app.route('/health')
 def health_check():
-    return jsonify({
-        'status': 'OK',
-        'timestamp': datetime.now().isoformat()
-    }), 200
-
-@app.route('/health/detailed')
-def detailed_health_check():
-    db_available, db_message = check_db_connection()
-    return jsonify({
-        'status': 'OK',
-        'database': {
-            'status': 'OK' if db_available else 'ERROR',
-            'message': db_message,
-            'available': db_available
-        },
-        'timestamp': datetime.now().isoformat()
-    }), 200
+    return "OK", 200
 
 # Cập nhật app configuration
 app.config['JSON_AS_ASCII'] = False  # Hỗ trợ tiếng Việt
 app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
-# Chạy ứng dụng
-if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=os.environ.get('PORT', 5000))
