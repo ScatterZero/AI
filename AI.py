@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, render_template_string, request
 from flask_restx import Api, Resource, fields
+from flask_cors import CORS
 import pandas as pd
 from datetime import datetime, timedelta
 import google.generativeai as genai
@@ -300,6 +301,7 @@ def get_product_detailed_info(connection, product_id):
 
 # Khởi tạo Flask app
 app = Flask(__name__)
+CORS(app)
 app.config['RESTX_MASK_SWAGGER'] = False  # Ngăn Flask-RESTx ghi đè route
 
 # Route cho trang chính
